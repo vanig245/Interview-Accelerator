@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PrepPilot: AI Interview Accelerator</title>
+<style>
+:root{--bg:#0f1220;--card:#181c2f;--line:#2a3050;--text:#e8eaf6;--muted:#9aa3c7;--accent:#6c7bff;--good:#3ddc97;--warn:#ffb84d;--bad:#ff6b6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.5}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 32px;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;font-size:22px}.logo span{color:var(--accent)}#crumb{color:var(--muted);font-size:14px}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+.screen{display:none}.screen.active{display:block}
+h1{font-size:34px;margin:8px 0}h3{margin:0 0 10px}.sub{color:var(--muted);margin-bottom:22px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.center{text-align:center}
+textarea{width:100%;min-height:220px;background:#10142a;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;resize:vertical}
+.iv textarea{min-height:130px}
+.file{display:block;margin-top:10px;color:var(--muted);font-size:13px}
+button{font:inherit;cursor:pointer;border-radius:10px;padding:11px 20px;border:1px solid var(--line)}
+.primary{background:var(--accent);color:#fff;border:none;font-weight:600}.primary:disabled{opacity:.5}
+.ghost{background:transparent;color:var(--text)}.row{display:flex;gap:10px;margin:10px 0 16px}
+.err{color:var(--bad)}.muted{color:var(--muted);font-size:13px}
+.chip{display:inline-block;padding:3px 10px;margin:3px;border-radius:20px;font-size:12px;background:#232850}
+.chip.good{background:#133d2e;color:var(--good)}.chip.warn{background:#44350f;color:var(--warn)}.chip.bad{background:#4a1c1c;color:var(--bad)}
+.fit{font-size:44px;font-weight:800;color:var(--accent)}
+.bar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.pill{background:var(--accent);padding:5px 14px;border-radius:20px;font-weight:600;font-size:13px}.pill.alt{background:#2b3160}
+.progress{flex:1;height:8px;background:var(--line);border-radius:8px;overflow:hidden}#progressFill{height:100%;width:0;background:var(--good);transition:width .4s}
+.avatar{font-size:72px;width:130px;height:130px;line-height:130px;margin:0 auto 8px;border-radius:50%;background:#232850}
+.avatar.speaking{animation:pulse 1s infinite}.avatar.listening{box-shadow:0 0 0 6px rgba(61,220,151,.4)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(108,123,255,.6)}50%{box-shadow:0 0 0 18px rgba(108,123,255,0)}}
+.question{font-size:19px;font-weight:600;margin:10px 0 16px}
+#cam{width:180px;border-radius:10px;margin:8px auto;display:block}
+#transcript{max-height:240px;overflow:auto}
+.msg{padding:8px 12px;border-radius:10px;margin:6px 0;font-size:14px}.msg.ai{background:#232850}.msg.you{background:#17352c}
+.loader{position:fixed;inset:0;background:rgba(10,12,25,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9}
+.loader[hidden]{display:none}.spin{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.score{font-size:64px;font-weight:800}.comp{margin:8px 0}.comp .track{height:10px;background:var(--line);border-radius:6px;overflow:hidden}.comp .fill{height:100%;background:var(--accent)}
+.qf{border-left:3px solid var(--accent);padding-left:14px;margin:18px 0}.qf b{color:var(--muted);font-size:12px;text-transform:uppercase}
+ul{padding-left:20px}
+</style>
+</head>
+<body>
+
+<header><div class="logo">Prep<span>Pilot</span></div><div id="crumb">Step 1 of 4: Upload</div></header>
+<main>
+
+  <section id="screen-setup" class="screen active">
+    <h1>Walk into your interview prepared.</h1>
+    <p class="sub">Paste or upload a job description and your resume. We'll analyse the fit, then interview you out loud.</p>
+    <div class="grid2">
+      <div class="card"><h3>Job Description</h3>
+        <textarea id="jd" placeholder="Paste the JD here..."></textarea>
+        <label class="file">or upload (PDF / DOCX / TXT) <input type="file" id="jdFile" accept=".pdf,.docx,.txt"></label></div>
+      <div class="card"><h3>Your Resume</h3>
+        <textarea id="resume" placeholder="Paste your resume here..."></textarea>
+        <label class="file">or upload (PDF / DOCX / TXT) <input type="file" id="resumeFile" accept=".pdf,.docx,.txt"></label></div>
+    </div>
+    <button class="primary" id="analyzeBtn">Analyse &amp; Continue</button>
+    <p class="err" id="setupErr"></p>
+  </section>
+
+  <section id="screen-analysis" class="screen">
+    <div class="grid2">
+      <div class="card" id="roleCard"></div>
+      <div class="card" id="candCard"></div>
+    </div>
+    <button class="primary" id="startBtn">Start AI Interview </button>
+  </section>
+
+  <section id="screen-interview" class="screen">
+    <div class="bar"><span id="levelPill" class="pill"></span><span id="diffPill" class="pill alt"></span>
+      <div class="progress"><div id="progressFill"></div></div><span id="progressText"></span></div>
+    <div class="grid2 iv">
+      <div class="card center">
+        <div id="avatar" class="avatar"></div>
+        <p class="muted" id="status">Ready</p>
+        <p id="currentQ" class="question"></p>
+        <video id="cam" autoplay muted playsinline hidden></video>
+        <button class="ghost" id="camBtn"> Turn on camera</button>
+      </div>
+      <div class="card">
+        <h3>Your answer <span class="muted">(speak, or edit the text)</span></h3>
+        <textarea id="answerBox" placeholder="Your spoken answer appears here."></textarea>
+        <div class="row">
+          <button class="ghost" id="micBtn"> Re-record</button>
+          <button class="primary" id="submitBtn">Submit answer →</button>
+        </div>
+        <h3>Transcript</h3>
+        <div id="transcript"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screen-report" class="screen"><div id="reportRoot"></div></section>
+
+</main>
+<div id="loader" class="loader" hidden><div class="spin"></div><p id="loaderText">Working</p></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const chips = (arr, cls = "") => (arr || []).map(x => `<span class="chip ${cls}">${esc(x)}</span>`).join("");
+const list = arr => `<ul>${(arr || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+
+let sessionId = null, analysis = null;
+let rec = null, listening = false, finalText = "", answerStart = 0, camStream = null;
+
+async function api(path, body) {
+  const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Request failed");
+  return res.json();
+}
+function show(name, crumb) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $("screen-" + name).classList.add("active");
+  $("crumb").textContent = crumb;
+  window.scrollTo(0, 0);
+}
+function loading(on, text = "Working") { $("loader").hidden = !on; $("loaderText").textContent = text; }
+
+function wireFile(fileId, textId) {
+  $(fileId).addEventListener("change", async e => {
+    const f = e.target.files[0]; if (!f) return;
+    const fd = new FormData(); fd.append("file", f);
+    loading(true, "Reading file...");
+    try {
+      const res = await fetch("/api/extract", { method: "POST", body: fd });
+      if (!res.ok) throw new Error((await res.json()).detail);
+      $(textId).value = (await res.json()).text;
+    } catch (err) { $("setupErr").textContent = err.message; }
+    loading(false);
+  });
+}
+wireFile("jdFile", "jd"); wireFile("resumeFile", "resume");
+
+$("analyzeBtn").onclick = async () => {
+  $("setupErr").textContent = "";
+  loading(true, "Analysing the role and your resume...");
+  try {
+    analysis = await api("/api/analyze", { jd: $("jd").value, resume: $("resume").value });
+    sessionId = analysis.session_id;
+    renderAnalysis(analysis);
+    show("analysis", "Step 2 of 4: Analysis");
+  } catch (err) { $("setupErr").textContent = err.message; }
+  loading(false);
+};
+
+function renderAnalysis({ role, candidate: c }) {
+  $("roleCard").innerHTML = `<h3> ${esc(role.role_title)}</h3><p class="muted">${esc(role.experience_expectations)}</p>
+    <b>Required skills</b><div>${chips(role.required_skills)}</div>
+    <b>Preferred skills</b><div>${chips(role.preferred_skills)}</div>
+    <b>Technical competencies</b><div>${chips(role.technical_competencies)}</div>
+    <b>Behavioural competencies</b><div>${chips(role.behavioural_competencies)}</div>
+    <b>Key responsibilities</b>${list(role.key_responsibilities)}
+    <b>Qualifications</b>${list(role.qualifications)}
+    <b>Keywords &amp; concepts</b><div>${chips([...(role.keywords || []), ...(role.concepts || [])])}</div>`;
+  $("candCard").innerHTML = `<h3>Your Job Fit</h3><div class="fit">${c.fit.score}%</div>
+    <b>Strong match</b><div>${chips(c.fit.strong, "good")}</div>
+    <b>Partial match</b><div>${chips(c.fit.partial, "warn")}</div>
+    <b>Missing / weak</b><div>${chips(c.fit.missing, "bad")}</div>
+    <b>Strengths</b>${list(c.strengths)}<b>Weak areas</b>${list(c.weak_areas)}
+    <b>Resume claims you'll be asked about</b>${list((c.claims_to_probe || []).map(x => x.claim))}
+    <b>Your skills</b><div>${chips(c.candidate_skills)}</div>`;
+}
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function speak(text) {
+  return new Promise(resolve => {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const v = speechSynthesis.getVoices().find(v => /en-(IN|GB|US)/.test(v.lang));
+    if (v) u.voice = v;
+    u.onstart = () => { $("avatar").classList.add("speaking"); $("status").textContent = "Interviewer speaking"; };
+    u.onend = u.onerror = () => { $("avatar").classList.remove("speaking"); resolve(); };
+    speechSynthesis.speak(u);
+  });
+}
+function startListening() {
+  if (!SR) { $("status").textContent = "Speech recognition not supported here. Use Chrome/Edge, or type your answer."; return; }
+  stopListening();
+  rec = new SR(); rec.lang = "en-IN"; rec.continuous = true; rec.interimResults = true;
+  finalText = ""; $("answerBox").value = ""; answerStart = Date.now();
+  rec.onresult = e => {
+    let interim = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const r = e.results[i];
+      if (r.isFinal) finalText += r[0].transcript + " "; else interim += r[0].transcript;
+    }
+    $("answerBox").value = finalText + interim;
+  };
+  rec.onend = () => { if (listening) { try { rec.start(); } catch {} } };
+  listening = true; rec.start();
+  $("avatar").classList.add("listening"); $("status").textContent = " Listening... click Submit when done";
+}
+function stopListening() {
+  listening = false;
+  if (rec) { try { rec.stop(); } catch {} rec = null; }
+  $("avatar").classList.remove("listening");
+}
+function addMsg(who, text) {
+  const d = document.createElement("div");
+  d.className = "msg " + who; d.textContent = (who === "ai" ? "Interviewer: " : "You: ") + text;
+  $("transcript").appendChild(d); $("transcript").scrollTop = 1e6;
+}
+
+async function presentTurn(t) {
+  $("levelPill").textContent = `Level ${t.level}: ${t.level_name}`;
+  $("diffPill").textContent = `Difficulty ${t.difficulty}/5`;
+  $("progressFill").style.width = (t.progress / t.total * 100) + "%";
+  $("progressText").textContent = `${t.progress}/${t.total} answered`;
+  $("currentQ").textContent = t.question;
+  addMsg("ai", t.question);
+  await speak(t.question);
+  startListening();
+}
+$("startBtn").onclick = async () => {
+  show("interview", "Step 3 of 4: Interview");
+  loading(true, "Preparing your interviewer...");
+  try { await presentTurn(await api("/api/interview/start", { session_id: sessionId })); }
+  catch (err) { alert(err.message); }
+  loading(false);
+};
+$("micBtn").onclick = () => { speechSynthesis.cancel(); startListening(); };
+$("submitBtn").onclick = async () => {
+  const answer = $("answerBox").value.trim();
+  if (!answer) return alert("Please answer the question first.");
+  const duration = (Date.now() - answerStart) / 1000;
+  stopListening(); speechSynthesis.cancel();
+  addMsg("you", answer);
+  $("submitBtn").disabled = true; $("status").textContent = "Interviewer is thinking...";
+  try {
+    const t = await api("/api/interview/answer", { session_id: sessionId, answer, duration_sec: duration });
+    if (t.done) return finish();
+    await presentTurn(t);
+  } catch (err) { alert(err.message); }
+  $("submitBtn").disabled = false;
+};
+$("camBtn").onclick = async () => {
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    $("cam").srcObject = camStream; $("cam").hidden = false; $("camBtn").hidden = true;
+  } catch { alert("Camera access denied."); }
+};
+
+async function finish() {
+  if (camStream) camStream.getTracks().forEach(t => t.stop());
+  loading(true, "Evaluating your interview...");
+  try {
+    renderReport(await api("/api/interview/report", { session_id: sessionId }));
+    show("report", "Step 4 of 4: Report");
+  } catch (err) { alert(err.message); }
+  loading(false);
+}
+function renderReport(r) {
+  const rd = r.readiness, ss = r.speech_stats || {};
+  const comps = Object.entries(r.competency_scores || {}).map(([k, v]) =>
+    `<div class="comp"><div>${esc(k)}: <b>${v}</b></div><div class="track"><div class="fill" style="width:${v}%"></div></div></div>`).join("");
+  const qf = (r.question_feedback || []).map(q => `<div class="qf">
+    <b>Question</b><p>${esc(q.question)}</p><b>Your answer</b><p>${esc(q.answer)}</p>
+    <b>Assessment</b><p>${esc(q.assessment)}</p><b>What was good</b><p>${esc(q.good)}</p>
+    <b>What could be better</b><p>${esc(q.better)}</p><b>Ideal direction</b><p>${esc(q.ideal_direction)}</p></div>`).join("");
+  const gaps = (r.preparation_gaps || []).map(g => `<div><h4>Priority ${esc(g.priority)}: ${esc(g.topic)}</h4>${list(g.review)}</div>`).join("");
+  $("reportRoot").innerHTML = `
+    <div class="grid2">
+      <div class="card center"><p class="muted">Overall Interview Score</p><div class="score">${r.overall_score}/100</div>
+        <p>${esc(r.summary)}</p></div>
+      <div class="card center"><p class="muted">Interview Readiness</p><div class="score">${rd.emoji}</div>
+        <h2>${esc(rd.label)} (${rd.score})</h2><p>${esc(rd.message)}</p>
+        <p class="muted">Based on interview score, competencies and your ${analysis.candidate.fit.score}% job fit.</p></div>
+    </div>
+    <div class="card"><h3>Competency Scores</h3>${comps}
+      <p class="muted">Speaking: ${ss.avg_wpm ?? "n/a"} words/min · ${ss.total_fillers ?? 0} filler words · ~${ss.avg_words ?? 0} words per answer</p></div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card"><h3>Strengths</h3>${list(r.strengths)}</div>
+      <div class="card"><h3> Weaknesses</h3>${list(r.weaknesses)}</div></div>
+    <div class="card"><h3> Preparation Plan</h3>${gaps}</div>
+    <div class="card" style="margin-top:18px"><h3>Question-by-Question Feedback</h3>${qf}</div>
+    <button class="primary" onclick="location.reload()" style="margin-top:18px">Practice again</button>`;
+}
+speechSynthesis.getVoices();
+</script>
+</body>
+</html>

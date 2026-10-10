@@ -81,3 +81,43 @@ def next_turn(s: dict, answer: str | None = None, duration: float = 0) -> dict:
     return {"done": False, "question": s["current_q"], "level": s["level"], "level_name": LEVELS[s["level"]][0],
             "difficulty": s["difficulty"], "progress": len(s["history"]), "total": TOTAL_Q,
             "question_type": out.get("question_type")}
+
+REPORT_SYSTEM = """You are a senior interviewer writing an honest, specific performance report for a mock interview.
+Score strictly: vague, short or incorrect answers must score low; do not inflate. Never give generic feedback; always reference
+what the candidate actually said. Return JSON:
+{"overall_score": 0-100,
+ "competency_scores": {"Role Fit": 0-100, "Technical Knowledge": 0-100, "Problem Solving": 0-100, "Communication": 0-100,
+                       "Confidence": 0-100, "Depth of Understanding": 0-100, "Behavioural Fit": 0-100},
+ "question_feedback": [{"question": str, "answer": str, "assessment": str, "good": str, "better": str, "ideal_direction": str}],
+ "strengths": [str], "weaknesses": [str],
+ "preparation_gaps": [{"priority": 1, "topic": str, "review": [str]}],
+ "summary": str}
+Use the speaking metrics (pace, fillers, answer length) as evidence for Communication and Confidence, but base most scores on answer quality.
+'better' must be actionable, e.g. say exactly which numbers, metrics or reasoning were missing. Order preparation_gaps by priority."""
+
+def readiness(overall: int, comps: dict, fit: int) -> dict:
+    nums = [v for v in comps.values() if isinstance(v, (int, float))]
+    avg = sum(nums) / max(len(nums), 1)
+    score = round(0.5 * float(overall or 0) + 0.2 * avg + 0.3 * fit)
+    if score < 40:
+        label, emoji, msg = "Not Ready", "🔴", "Significant preparation required."
+    elif score < 60:
+        label, emoji, msg = "Needs Preparation", "🟠", "Some important gaps remain."
+    elif score < 78:
+        label, emoji, msg = "Interview Ready", "🟡", "You can reasonably attempt the interview."
+    else:
+        label, emoji, msg = "Strong Candidate", "🟢", "You show strong readiness for this role."
+    return {"score": score, "label": label, "emoji": emoji, "message": msg}
+
+def build_report(s: dict) -> dict:
+    turns = [{"level": LEVELS[h["level"]][0], "question": h["question"], "answer": h["answer"],
+              "live_eval": h.get("eval"), "metrics": h["metrics"]} for h in s["history"]]
+    user = (f"{_context(s)}\n\nJOB FIT SCORE: {s['cand']['fit']['score']}\n\nINTERVIEW TRANSCRIPT WITH METRICS:\n{turns}")
+    rep = chat_json(REPORT_SYSTEM, user, temperature=0.3, max_tokens=4500)
+    rep["readiness"] = readiness(rep.get("overall_score", 0), rep.get("competency_scores", {}), s["cand"]["fit"]["score"])
+    ms = [h["metrics"] for h in s["history"]]
+    paces = [m["wpm"] for m in ms if m["wpm"]]
+    rep["speech_stats"] = {"avg_wpm": round(sum(paces) / len(paces)) if paces else None,
+                           "total_fillers": sum(m["fillers"] for m in ms),
+                           "avg_words": round(sum(m["words"] for m in ms) / max(len(ms), 1))}
+    return rep
