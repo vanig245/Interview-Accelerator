@@ -3,6 +3,10 @@
 Interview Accelerator is a web app that prepares you for one specific job interview. You give it a job description and your resume, and it works out what the employer wants, how well you match, and then interviews you out loud. The interviewer is an AI that reads your resume, listens to your answers, and decides what to ask next based on how you actually did. At the end you get a scored report, specific feedback on every answer, and a prioritised list of what to study before the real thing.
 
 I built it because generic question banks never prepared me for the questions that actually get asked: the ones about my own projects and the claims on my own resume.
+
+**Live demo:** `https://interview-accelerator-w3z8.onrender.com`  
+
+
 ---
 
 ## What it does
