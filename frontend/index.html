@@ -3,91 +3,512 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Interview Accelerator</title>
+<title>Interview Accelerator — AI Interview &amp; Tailored Portfolio Studio</title>
 <style>
-:root{--bg:#0f1220;--card:#181c2f;--line:#2a3050;--text:#e8eaf6;--muted:#9aa3c7;--accent:#6c7bff;--good:#3ddc97;--warn:#ffb84d;--bad:#ff6b6b}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.5}
-header{display:flex;justify-content:space-between;align-items:center;padding:16px 32px;border-bottom:1px solid var(--line)}
-.logo{font-weight:800;font-size:22px}.logo span{color:var(--accent)}#crumb{color:var(--muted);font-size:14px}
-main{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
-.screen{display:none}.screen.active{display:block}
-h1{font-size:34px;margin:8px 0}h3{margin:0 0 10px}.sub{color:var(--muted);margin-bottom:22px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
-@media(max-width:800px){.grid2{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
-.center{text-align:center}
-textarea{width:100%;min-height:220px;background:#10142a;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;resize:vertical}
-.iv textarea{min-height:130px}
-.file{display:block;margin-top:10px;color:var(--muted);font-size:13px}
-button{font:inherit;cursor:pointer;border-radius:10px;padding:11px 20px;border:1px solid var(--line)}
-.primary{background:var(--accent);color:#fff;border:none;font-weight:600}.primary:disabled{opacity:.5}
-.ghost{background:transparent;color:var(--text)}.row{display:flex;gap:10px;margin:10px 0 16px}
-.err{color:var(--bad)}.muted{color:var(--muted);font-size:13px}
-.chip{display:inline-block;padding:3px 10px;margin:3px;border-radius:20px;font-size:12px;background:#232850}
-.chip.good{background:#133d2e;color:var(--good)}.chip.warn{background:#44350f;color:var(--warn)}.chip.bad{background:#4a1c1c;color:var(--bad)}
-.fit{font-size:44px;font-weight:800;color:var(--accent)}
-.bar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.pill{background:var(--accent);padding:5px 14px;border-radius:20px;font-weight:600;font-size:13px}.pill.alt{background:#2b3160}
-.progress{flex:1;height:8px;background:var(--line);border-radius:8px;overflow:hidden}#progressFill{height:100%;width:0;background:var(--good);transition:width .4s}
-.avatar{font-size:72px;width:130px;height:130px;line-height:130px;margin:0 auto 8px;border-radius:50%;background:#232850}
-.avatar.speaking{animation:pulse 1s infinite}.avatar.listening{box-shadow:0 0 0 6px rgba(61,220,151,.4)}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(108,123,255,.6)}50%{box-shadow:0 0 0 18px rgba(108,123,255,0)}}
-.question{font-size:19px;font-weight:600;margin:10px 0 16px}
-#cam{width:180px;border-radius:10px;margin:8px auto;display:block}
-#transcript{max-height:240px;overflow:auto}
-.msg{padding:8px 12px;border-radius:10px;margin:6px 0;font-size:14px}.msg.ai{background:#232850}.msg.you{background:#17352c}
-.loader{position:fixed;inset:0;background:rgba(10,12,25,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9}
-.loader[hidden]{display:none}.spin{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s 1s linear infinite}
-@keyframes s{to{transform:rotate(360deg)}}
-.score{font-size:64px;font-weight:800}.comp{margin:8px 0}.comp .track{height:10px;background:var(--line);border-radius:6px;overflow:hidden}.comp .fill{height:100%;background:var(--accent)}
-.qf{border-left:3px solid var(--accent);padding-left:14px;margin:18px 0}.qf b{color:var(--muted);font-size:12px;text-transform:uppercase}
-ul{padding-left:20px}
+:root {
+  --bg: #0b0e1a;
+  --card: #15192c;
+  --card-hover: #1b213a;
+  --line: #262d4a;
+  --text: #e8eaf6;
+  --muted: #95a0c6;
+  --accent: #6c7bff;
+  --accent-gradient: linear-gradient(135deg, #6c7bff 0%, #8c52ff 100%);
+  --good: #3ddc97;
+  --warn: #ffb84d;
+  --bad: #ff6b6b;
+  --radius: 14px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 36px;
+  background: rgba(15, 18, 34, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.logo {
+  font-weight: 800;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+.logo span { color: var(--accent); }
+.badge-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  background: rgba(108, 123, 255, 0.15);
+  color: #8ea1ff;
+  border-radius: 12px;
+  border: 1px solid rgba(108, 123, 255, 0.3);
+  margin-left: 6px;
+}
+#crumb {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+.screen { display: none; }
+.screen.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+h1 { font-size: 34px; margin: 8px 0; font-weight: 800; letter-spacing: -0.5px; }
+h2 { font-size: 24px; font-weight: 700; }
+h3 { margin: 0 0 10px; font-size: 18px; }
+.sub { color: var(--muted); margin-bottom: 24px; font-size: 16px; max-width: 760px; }
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+@media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  transition: border-color 0.2s;
+}
+.center { text-align: center; }
+
+textarea {
+  width: 100%;
+  min-height: 220px;
+  background: #0d1020;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  font: inherit;
+  resize: vertical;
+  line-height: 1.5;
+}
+textarea:focus { outline: none; border-color: var(--accent); }
+.iv textarea { min-height: 120px; }
+
+.file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+.file input { margin-left: 6px; }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 11px 22px;
+  border: 1px solid var(--line);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.primary {
+  background: var(--accent-gradient);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(108, 123, 255, 0.3);
+}
+.primary:hover { opacity: 0.95; transform: translateY(-1px); }
+.primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.ghost {
+  background: transparent;
+  color: var(--text);
+}
+.ghost:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--accent); }
+.row { display: flex; gap: 12px; margin: 12px 0 16px; flex-wrap: wrap; }
+.err { color: var(--bad); margin-top: 10px; }
+.muted { color: var(--muted); font-size: 13px; }
+
+.chip {
+  display: inline-block;
+  padding: 4px 11px;
+  margin: 3px;
+  border-radius: 20px;
+  font-size: 12px;
+  background: #1e2444;
+  color: #c9d2f0;
+}
+.chip.good { background: #133d2e; color: var(--good); border: 1px solid rgba(61,220,151,.25); }
+.chip.warn { background: #44350f; color: var(--warn); border: 1px solid rgba(255,184,77,.25); }
+.chip.bad { background: #4a1c1c; color: var(--bad); border: 1px solid rgba(255,107,107,.25); }
+
+.fit { font-size: 46px; font-weight: 800; color: var(--accent); }
+.bar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.pill {
+  background: var(--accent);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.pill.alt { background: #262d56; }
+.progress {
+  flex: 1;
+  height: 8px;
+  background: var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+#progressFill { height: 100%; width: 0; background: var(--good); transition: width 0.4s; }
+
+.avatar {
+  font-size: 72px;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  background: #1c2242;
+}
+.avatar.speaking { animation: pulse 1s infinite; }
+.avatar.listening { box-shadow: 0 0 0 6px rgba(61,220,151,.4); }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(108,123,255,.6); }
+  50% { box-shadow: 0 0 0 18px rgba(108,123,255,0); }
+}
+.question { font-size: 19px; font-weight: 600; margin: 12px 0 16px; }
+#cam { width: 180px; border-radius: 10px; margin: 8px auto; display: block; }
+#transcript { max-height: 240px; overflow: auto; padding: 4px; }
+.msg { padding: 9px 14px; border-radius: 10px; margin: 6px 0; font-size: 14px; }
+.msg.ai { background: #1c2242; border-left: 3px solid var(--accent); }
+.msg.you { background: #153227; border-left: 3px solid var(--good); }
+
+.loader {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 14, 26, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.loader[hidden] { display: none; }
+.spin {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: s 1s linear infinite;
+}
+@keyframes s { to { transform: rotate(360deg); } }
+
+/* Style Selector in Step 3 */
+.style-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 16px 0 24px;
+}
+@media (max-width: 800px) { .style-grid { grid-template-columns: 1fr; } }
+.style-card {
+  background: #111528;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.style-card:hover { border-color: #434f82; }
+.style-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(108, 123, 255, 0.25);
+  transform: translateY(-2px);
+}
+.style-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.style-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.style-name { font-weight: 700; font-size: 15px; }
+.style-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
+.color-dots { display: flex; gap: 6px; }
+.color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Browser Mockup Window */
+.browser-window {
+  background: #15192c;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  margin-bottom: 24px;
+}
+.browser-bar {
+  background: #0f1222;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.traffic-lights {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.traffic-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.traffic-dot.red { background: #ff5f56; }
+.traffic-dot.yellow { background: #ffbd2e; }
+.traffic-dot.green { background: #27c93f; }
+.browser-actions {
+  display: flex;
+  gap: 8px;
+}
+.preview-iframe-wrap {
+  position: relative;
+  width: 100%;
+  height: 640px;
+  background: #ffffff;
+  transition: width 0.3s;
+  margin: 0 auto;
+}
+.preview-iframe-wrap.mobile {
+  width: 410px;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+}
+#portfolioFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Report Styles */
+.score { font-size: 64px; font-weight: 800; }
+.comp { margin: 10px 0; }
+.comp .track { height: 10px; background: var(--line); border-radius: 6px; overflow: hidden; }
+.comp .fill { height: 100%; background: var(--accent); }
+.qf { border-left: 3px solid var(--accent); padding-left: 14px; margin: 18px 0; }
+.qf b { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+ul { padding-left: 20px; }
 </style>
 </head>
 <body>
 
-<header><div class="logo">Interview<span>Accelerator</span></div><div id="crumb">Step 1 of 4: Upload</div></header>
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div>Interview<span>Accelerator</span></div>
+    <span class="badge-tag">Portfolio Studio</span>
+  </div>
+  <div id="crumb">Step 1 of 5: Upload</div>
+</header>
+
 <main>
 
+  <!-- SCREEN 1: SETUP -->
   <section id="screen-setup" class="screen active">
     <h1>Walk into your interview prepared.</h1>
-    <p class="sub">Paste or upload a job description and your resume. We'll analyse the fit, then interview you out loud.</p>
+    <p class="sub">Paste or upload a job description and your resume. We'll analyse your fit, generate a complete tailored portfolio website, and interview you out loud.</p>
     <div class="grid2">
-      <div class="card"><h3>Job Description</h3>
-        <textarea id="jd" placeholder="Paste the JD here..."></textarea>
-        <label class="file">or upload (PDF / DOCX / TXT) <input type="file" id="jdFile" accept=".pdf,.docx,.txt"></label></div>
-      <div class="card"><h3>Your Resume</h3>
-        <textarea id="resume" placeholder="Paste your resume here..."></textarea>
-        <label class="file">or upload (PDF / DOCX / TXT) <input type="file" id="resumeFile" accept=".pdf,.docx,.txt"></label></div>
+      <div class="card">
+        <h3> Target Job Description</h3>
+        <textarea id="jd" placeholder="Paste the full job description here..."></textarea>
+        <label class="file">📁 or upload (PDF / DOCX / TXT) <input type="file" id="jdFile" accept=".pdf,.docx,.txt"></label>
+      </div>
+      <div class="card">
+        <h3> Your Resume</h3>
+        <textarea id="resume" placeholder="Paste your resume text here..."></textarea>
+        <label class="file">📁 or upload (PDF / DOCX / TXT) <input type="file" id="resumeFile" accept=".pdf,.docx,.txt"></label>
+      </div>
     </div>
-    <button class="primary" id="analyzeBtn">Analyse &amp; Continue</button>
+    <button class="primary" id="analyzeBtn">Analyse Role &amp; Resume →</button>
     <p class="err" id="setupErr"></p>
   </section>
 
+  <!-- SCREEN 2: ANALYSIS & FIT -->
   <section id="screen-analysis" class="screen">
     <div class="grid2">
       <div class="card" id="roleCard"></div>
       <div class="card" id="candCard"></div>
     </div>
-    <button class="primary" id="startBtn">Start AI Interview </button>
+
+    <!-- Portfolio Studio Hero Banner -->
+    <div class="card" style="margin-top:20px; border:1px solid rgba(108,123,255,0.4); background:linear-gradient(135deg, #15192c 0%, #1c2246 100%);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+            <span style="font-size:24px;">💼</span>
+            <h3 style="margin:0; font-size:19px;">End-to-End Tailored Portfolio Studio</h3>
+            <span class="badge-tag">LaunchMyFolio Engine</span>
+          </div>
+          <p class="muted" style="margin:0; max-width:640px;">
+            Synthesize a full, production-grade portfolio website custom-engineered to prove every requirement in this job description.
+          </p>
+        </div>
+        <div class="row" style="margin:0;">
+          <button class="primary" id="openPortfolioBtn">Launch Portfolio Studio </button>
+          <button class="ghost" id="startInterviewDirectBtn">Start AI Interview </button>
+        </div>
+      </div>
+    </div>
   </section>
 
+  <!-- SCREEN 3: PORTFOLIO STUDIO -->
+  <section id="screen-portfolio" class="screen">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+      <div>
+        <h2 style="margin:0 0 4px;">Tailored Portfolio Studio</h2>
+        <p class="muted" style="margin:0;">Interactive live preview with responsive themes and instant code export.</p>
+      </div>
+      <div class="row" style="margin:0;">
+        <button class="ghost" id="backToAnalysisBtn">← Back to Fit Analysis</button>
+        <button class="primary" id="proceedToInterviewBtn">Start AI Interview 🎙️</button>
+      </div>
+    </div>
+
+    <!-- Style Selector Cards -->
+    <div class="style-grid">
+      <div class="style-card active" data-style="professional" id="styleCard-professional">
+        <div class="style-header">
+          <div class="style-icon" style="background:#2563eb; color:#fff;">👔</div>
+          <div class="style-name">Professional</div>
+        </div>
+        <div class="style-desc">Clean, corporate modern aesthetic with slate blue accents, ideal for engineering roles.</div>
+        <div class="color-dots">
+          <div class="color-dot" style="background:#2563eb"></div>
+          <div class="color-dot" style="background:#0f172a"></div>
+          <div class="color-dot" style="background:#f8fafc"></div>
+        </div>
+      </div>
+
+      <div class="style-card" data-style="futuristic" id="styleCard-futuristic">
+        <div class="style-header">
+          <div class="style-icon" style="background:#00ffff; color:#000;">⚡</div>
+          <div class="style-name">Futuristic Cyber</div>
+        </div>
+        <div class="style-desc">Neon cyberpunk dark theme with glowing cyan, electric violet, and tech typography.</div>
+        <div class="color-dots">
+          <div class="color-dot" style="background:#00ffff"></div>
+          <div class="color-dot" style="background:#bd00ff"></div>
+          <div class="color-dot" style="background:#0a0a14"></div>
+        </div>
+      </div>
+
+      <div class="style-card" data-style="playful" id="styleCard-playful">
+        <div class="style-header">
+          <div class="style-icon" style="background:#ff5a5f; color:#fff;">🎨</div>
+          <div class="style-name">Creative / Playful</div>
+        </div>
+        <div class="style-desc">Warm vibrant design with coral gradients, pastel cards, and friendly typography.</div>
+        <div class="color-dots">
+          <div class="color-dot" style="background:#ff5a5f"></div>
+          <div class="color-dot" style="background:#00a699"></div>
+          <div class="color-dot" style="background:#fc642d"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Browser Mockup Window -->
+    <div class="browser-window">
+      <div class="browser-bar">
+        <div class="traffic-lights" style="display:flex; align-items:center; gap:8px;">
+          <div class="traffic-dot red"></div>
+          <div class="traffic-dot yellow"></div>
+          <div class="traffic-dot green"></div>
+          <span style="font-size:13px; color:var(--muted); font-weight:500; margin-left:8px;">Portfolio Live Preview</span>
+        </div>
+        <div class="browser-actions">
+          <button class="ghost" id="toggleViewportBtn" style="padding:4px 10px; font-size:12px;">📱 Mobile View</button>
+          <button class="ghost" id="openNewTabBtn" style="padding:4px 12px; font-size:12px;">↗ Open in New Tab</button>
+          <button class="primary" id="downloadHtmlBtn" style="padding:4px 14px; font-size:12px;">⬇ Download HTML</button>
+        </div>
+      </div>
+
+      <div class="preview-iframe-wrap" id="iframeWrap">
+        <iframe id="portfolioFrame" sandbox="allow-same-origin allow-scripts"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: INTERVIEW -->
   <section id="screen-interview" class="screen">
-    <div class="bar"><span id="levelPill" class="pill"></span><span id="diffPill" class="pill alt"></span>
-      <div class="progress"><div id="progressFill"></div></div><span id="progressText"></span></div>
+    <div class="bar">
+      <span id="levelPill" class="pill"></span>
+      <span id="diffPill" class="pill alt"></span>
+      <div class="progress"><div id="progressFill"></div></div>
+      <span id="progressText"></span>
+    </div>
     <div class="grid2 iv">
       <div class="card center">
-        <div id="avatar" class="avatar"></div>
+        <div id="avatar" class="avatar">👨‍💼</div>
         <p class="muted" id="status">Ready</p>
         <p id="currentQ" class="question"></p>
         <video id="cam" autoplay muted playsinline hidden></video>
-        <button class="ghost" id="camBtn"> Turn on camera</button>
+        <button class="ghost" id="camBtn">📹 Turn on camera</button>
       </div>
       <div class="card">
         <h3>Your answer <span class="muted">(speak, or edit the text)</span></h3>
-        <textarea id="answerBox" placeholder="Your spoken answer appears here."></textarea>
+        <textarea id="answerBox" placeholder="Your spoken answer appears here..."></textarea>
         <div class="row">
-          <button class="ghost" id="micBtn"> Re-record</button>
+          <button class="ghost" id="micBtn">🎙️ Re-record</button>
           <button class="primary" id="submitBtn">Submit answer →</button>
         </div>
         <h3>Transcript</h3>
@@ -96,10 +517,17 @@ ul{padding-left:20px}
     </div>
   </section>
 
-  <section id="screen-report" class="screen"><div id="reportRoot"></div></section>
+  <!-- SCREEN 5: REPORT -->
+  <section id="screen-report" class="screen">
+    <div id="reportRoot"></div>
+  </section>
 
 </main>
-<div id="loader" class="loader" hidden><div class="spin"></div><p id="loaderText">Working</p></div>
+
+<div id="loader" class="loader" hidden>
+  <div class="spin"></div>
+  <p id="loaderText" style="margin-top:16px; font-weight:600;">Working</p>
+</div>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -107,67 +535,195 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;
 const chips = (arr, cls = "") => (arr || []).map(x => `<span class="chip ${cls}">${esc(x)}</span>`).join("");
 const list = arr => `<ul>${(arr || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
 
-let sessionId = null, analysis = null;
+let sessionId = null, analysis = null, portfolioPayload = null;
+let selectedStyle = "professional", currentHtml = "", isMobileView = false;
 let rec = null, listening = false, finalText = "", answerStart = 0, camStream = null;
 
 async function api(path, body) {
-  const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Request failed");
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || err.error || "Request failed");
+  }
   return res.json();
 }
+
 function show(name, crumb) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   $("screen-" + name).classList.add("active");
   $("crumb").textContent = crumb;
   window.scrollTo(0, 0);
 }
-function loading(on, text = "Working") { $("loader").hidden = !on; $("loaderText").textContent = text; }
+
+function loading(on, text = "Working") {
+  $("loader").hidden = !on;
+  $("loaderText").textContent = text;
+}
 
 function wireFile(fileId, textId) {
   $(fileId).addEventListener("change", async e => {
-    const f = e.target.files[0]; if (!f) return;
-    const fd = new FormData(); fd.append("file", f);
+    const f = e.target.files[0];
+    if (!f) return;
+    const fd = new FormData();
+    fd.append("file", f);
     loading(true, "Reading file...");
     try {
       const res = await fetch("/api/extract", { method: "POST", body: fd });
       if (!res.ok) throw new Error((await res.json()).detail);
       $(textId).value = (await res.json()).text;
-    } catch (err) { $("setupErr").textContent = err.message; }
+    } catch (err) {
+      $("setupErr").textContent = err.message;
+    }
     loading(false);
   });
 }
-wireFile("jdFile", "jd"); wireFile("resumeFile", "resume");
+wireFile("jdFile", "jd");
+wireFile("resumeFile", "resume");
 
 $("analyzeBtn").onclick = async () => {
   $("setupErr").textContent = "";
-  loading(true, "Analysing the role and your resume...");
+  loading(true, "Analysing role requirements and candidate fit...");
   try {
     analysis = await api("/api/analyze", { jd: $("jd").value, resume: $("resume").value });
     sessionId = analysis.session_id;
+    portfolioPayload = null;
     renderAnalysis(analysis);
-    show("analysis", "Step 2 of 4: Analysis");
-  } catch (err) { $("setupErr").textContent = err.message; }
+    show("analysis", "Step 2 of 5: Role & Fit Analysis");
+  } catch (err) {
+    $("setupErr").textContent = err.message;
+  }
   loading(false);
 };
 
 function renderAnalysis({ role, candidate: c }) {
-  $("roleCard").innerHTML = `<h3> ${esc(role.role_title)}</h3><p class="muted">${esc(role.experience_expectations)}</p>
-    <b>Required skills</b><div>${chips(role.required_skills)}</div>
-    <b>Preferred skills</b><div>${chips(role.preferred_skills)}</div>
-    <b>Technical competencies</b><div>${chips(role.technical_competencies)}</div>
-    <b>Behavioural competencies</b><div>${chips(role.behavioural_competencies)}</div>
-    <b>Key responsibilities</b>${list(role.key_responsibilities)}
-    <b>Qualifications</b>${list(role.qualifications)}
-    <b>Keywords &amp; concepts</b><div>${chips([...(role.keywords || []), ...(role.concepts || [])])}</div>`;
-  $("candCard").innerHTML = `<h3>Your Job Fit</h3><div class="fit">${c.fit.score}%</div>
-    <b>Strong match</b><div>${chips(c.fit.strong, "good")}</div>
-    <b>Partial match</b><div>${chips(c.fit.partial, "warn")}</div>
-    <b>Missing / weak</b><div>${chips(c.fit.missing, "bad")}</div>
-    <b>Strengths</b>${list(c.strengths)}<b>Weak areas</b>${list(c.weak_areas)}
-    <b>Resume claims you'll be asked about</b>${list((c.claims_to_probe || []).map(x => x.claim))}
-    <b>Your skills</b><div>${chips(c.candidate_skills)}</div>`;
+  $("roleCard").innerHTML = `
+    <h3>🎯 ${esc(role.role_title || "Target Role")}</h3>
+    <p class="muted">${esc(role.experience_expectations || "")}</p>
+    <b>Required Skills:</b><div>${chips(role.required_skills)}</div>
+    <b>Preferred Skills:</b><div>${chips(role.preferred_skills)}</div>
+    <b>Technical Competencies:</b><div>${chips(role.technical_competencies)}</div>
+    <b>Key Responsibilities:</b>${list(role.key_responsibilities)}
+    <b>Qualifications:</b>${list(role.qualifications)}`;
+
+  $("candCard").innerHTML = `
+    <h3>Candidate Job Fit</h3>
+    <div class="fit">${c.fit.score}%</div>
+    <b>Strong Matches:</b><div>${chips(c.fit.strong, "good")}</div>
+    <b>Partial Matches:</b><div>${chips(c.fit.partial, "warn")}</div>
+    <b>Missing / Competency Gaps:</b><div>${chips(c.fit.missing, "bad")}</div>
+    <b>Identified Strengths:</b>${list(c.strengths)}
+    <b>Weak Areas / Gaps:</b>${list(c.weak_areas)}
+    <b>Resume Claims Interviewer Will Probe:</b>${list((c.claims_to_probe || []).map(x => x.claim))}`;
 }
 
+// Portfolio Studio Loader
+async function openPortfolioStudio() {
+  if (portfolioPayload && portfolioPayload.html) {
+    show("portfolio", "Step 3 of 5: Portfolio Studio");
+    return;
+  }
+  loading(true, "Synthesizing end-to-end tailored portfolio website...");
+  try {
+    portfolioPayload = await api("/api/portfolio", {
+      session_id: sessionId,
+      jd: $("jd").value,
+      resume: $("resume").value,
+      style: selectedStyle
+    });
+    applyPortfolioData(portfolioPayload);
+    show("portfolio", "Step 3 of 5: Portfolio Studio");
+  } catch (err) {
+    alert("Portfolio generation failed: " + err.message);
+  }
+  loading(false);
+}
+
+function applyPortfolioData(payload) {
+  currentHtml = payload.html;
+  $("portfolioFrame").srcdoc = currentHtml;
+}
+
+// Style Switcher
+document.querySelectorAll(".style-card").forEach(card => {
+  card.addEventListener("click", async () => {
+    document.querySelectorAll(".style-card").forEach(c => c.classList.remove("active"));
+    card.classList.add("active");
+    selectedStyle = card.dataset.style;
+    
+    if (portfolioPayload && portfolioPayload.data) {
+      loading(true, `Applying ${selectedStyle} theme...`);
+      try {
+        const res = await api("/api/portfolio/html", {
+          portfolio_data: portfolioPayload.data,
+          style: selectedStyle
+        });
+        currentHtml = res.html;
+        $("portfolioFrame").srcdoc = currentHtml;
+      } catch (e) {
+        alert("Failed to change style: " + e.message);
+      }
+      loading(false);
+    }
+  });
+});
+
+// Viewport toggle
+$("toggleViewportBtn").onclick = () => {
+  isMobileView = !isMobileView;
+  const wrap = $("iframeWrap");
+  if (isMobileView) {
+    wrap.classList.add("mobile");
+    $("toggleViewportBtn").textContent = "🖥️ Desktop View";
+  } else {
+    wrap.classList.remove("mobile");
+    $("toggleViewportBtn").textContent = "📱 Mobile View";
+  }
+};
+
+// Open in new tab
+$("openNewTabBtn").onclick = () => {
+  if (currentHtml) {
+    const blob = new Blob([currentHtml], { type: "text/html;charset=utf-8" });
+    window.open(URL.createObjectURL(blob), "_blank");
+  }
+};
+
+// Download standalone HTML website
+$("downloadHtmlBtn").onclick = () => {
+  if (!currentHtml) return;
+  const blob = new Blob([currentHtml], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  const cand = (portfolioPayload?.data?.name || "portfolio").replace(/[^a-zA-Z0-9]/g, "_");
+  a.download = `${cand}_Portfolio_${selectedStyle}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
+
+// Navigation wires
+$("openPortfolioBtn").onclick = openPortfolioStudio;
+$("backToAnalysisBtn").onclick = () => show("analysis", "Step 2 of 5: Role & Fit Analysis");
+
+async function startInterview() {
+  show("interview", "Step 4 of 5: AI Voice Interview");
+  loading(true, "Preparing your AI interviewer...");
+  try {
+    await presentTurn(await api("/api/interview/start", { session_id: sessionId }));
+  } catch (err) {
+    alert("Failed to start interview: " + err.message);
+  }
+  loading(false);
+}
+
+$("startInterviewDirectBtn").onclick = startInterview;
+$("proceedToInterviewBtn").onclick = startInterview;
+
+// Speech Recognition & Interview Engine
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 function speak(text) {
@@ -176,37 +732,53 @@ function speak(text) {
     const u = new SpeechSynthesisUtterance(text);
     const v = speechSynthesis.getVoices().find(v => /en-(IN|GB|US)/.test(v.lang));
     if (v) u.voice = v;
-    u.onstart = () => { $("avatar").classList.add("speaking"); $("status").textContent = "Interviewer speaking"; };
+    u.onstart = () => { $("avatar").classList.add("speaking"); $("status").textContent = "Interviewer speaking..."; };
     u.onend = u.onerror = () => { $("avatar").classList.remove("speaking"); resolve(); };
     speechSynthesis.speak(u);
   });
 }
+
 function startListening() {
-  if (!SR) { $("status").textContent = "Speech recognition not supported here. Use Chrome/Edge, or type your answer."; return; }
+  if (!SR) {
+    $("status").textContent = "Speech recognition not supported in this browser. Please type your answer.";
+    return;
+  }
   stopListening();
-  rec = new SR(); rec.lang = "en-IN"; rec.continuous = true; rec.interimResults = true;
-  finalText = ""; $("answerBox").value = ""; answerStart = Date.now();
+  rec = new SR();
+  rec.lang = "en-US";
+  rec.continuous = true;
+  rec.interimResults = true;
+  finalText = "";
+  $("answerBox").value = "";
+  answerStart = Date.now();
   rec.onresult = e => {
     let interim = "";
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const r = e.results[i];
-      if (r.isFinal) finalText += r[0].transcript + " "; else interim += r[0].transcript;
+      if (r.isFinal) finalText += r[0].transcript + " ";
+      else interim += r[0].transcript;
     }
     $("answerBox").value = finalText + interim;
   };
   rec.onend = () => { if (listening) { try { rec.start(); } catch {} } };
-  listening = true; rec.start();
-  $("avatar").classList.add("listening"); $("status").textContent = " Listening... click Submit when done";
+  listening = true;
+  rec.start();
+  $("avatar").classList.add("listening");
+  $("status").textContent = "Listening... Speak your answer";
 }
+
 function stopListening() {
   listening = false;
   if (rec) { try { rec.stop(); } catch {} rec = null; }
   $("avatar").classList.remove("listening");
 }
+
 function addMsg(who, text) {
   const d = document.createElement("div");
-  d.className = "msg " + who; d.textContent = (who === "ai" ? "Interviewer: " : "You: ") + text;
-  $("transcript").appendChild(d); $("transcript").scrollTop = 1e6;
+  d.className = "msg " + who;
+  d.textContent = (who === "ai" ? "Interviewer: " : "You: ") + text;
+  $("transcript").appendChild(d);
+  $("transcript").scrollTop = 1e6;
 }
 
 async function presentTurn(t) {
@@ -219,70 +791,118 @@ async function presentTurn(t) {
   await speak(t.question);
   startListening();
 }
-$("startBtn").onclick = async () => {
-  show("interview", "Step 3 of 4: Interview");
-  loading(true, "Preparing your interviewer...");
-  try { await presentTurn(await api("/api/interview/start", { session_id: sessionId })); }
-  catch (err) { alert(err.message); }
-  loading(false);
-};
+
 $("micBtn").onclick = () => { speechSynthesis.cancel(); startListening(); };
+
 $("submitBtn").onclick = async () => {
   const answer = $("answerBox").value.trim();
-  if (!answer) return alert("Please answer the question first.");
+  if (!answer) return alert("Please provide an answer first.");
   const duration = (Date.now() - answerStart) / 1000;
-  stopListening(); speechSynthesis.cancel();
+  stopListening();
+  speechSynthesis.cancel();
   addMsg("you", answer);
-  $("submitBtn").disabled = true; $("status").textContent = "Interviewer is thinking...";
+  $("submitBtn").disabled = true;
+  $("status").textContent = "Evaluating your response...";
   try {
-    const t = await api("/api/interview/answer", { session_id: sessionId, answer, duration_sec: duration });
+    const t = await api("/api/interview/answer", {
+      session_id: sessionId,
+      answer,
+      duration_sec: duration
+    });
     if (t.done) return finish();
     await presentTurn(t);
-  } catch (err) { alert(err.message); }
+  } catch (err) {
+    alert(err.message);
+  }
   $("submitBtn").disabled = false;
 };
+
 $("camBtn").onclick = async () => {
   try {
     camStream = await navigator.mediaDevices.getUserMedia({ video: true });
-    $("cam").srcObject = camStream; $("cam").hidden = false; $("camBtn").hidden = true;
-  } catch { alert("Camera access denied."); }
+    $("cam").srcObject = camStream;
+    $("cam").hidden = false;
+    $("camBtn").hidden = true;
+  } catch {
+    alert("Camera access denied or unavailable.");
+  }
 };
 
 async function finish() {
   if (camStream) camStream.getTracks().forEach(t => t.stop());
-  loading(true, "Evaluating your interview...");
+  loading(true, "Compiling your final interview evaluation report...");
   try {
     renderReport(await api("/api/interview/report", { session_id: sessionId }));
-    show("report", "Step 4 of 4: Report");
-  } catch (err) { alert(err.message); }
+    show("report", "Step 5 of 5: Performance Report");
+  } catch (err) {
+    alert(err.message);
+  }
   loading(false);
 }
+
 function renderReport(r) {
-  const rd = r.readiness, ss = r.speech_stats || {};
+  const rd = r.readiness || { emoji: "🟡", label: "Ready", score: 70, message: "" };
+  const ss = r.speech_stats || {};
   const comps = Object.entries(r.competency_scores || {}).map(([k, v]) =>
-    `<div class="comp"><div>${esc(k)}: <b>${v}</b></div><div class="track"><div class="fill" style="width:${v}%"></div></div></div>`).join("");
-  const qf = (r.question_feedback || []).map(q => `<div class="qf">
-    <b>Question</b><p>${esc(q.question)}</p><b>Your answer</b><p>${esc(q.answer)}</p>
-    <b>Assessment</b><p>${esc(q.assessment)}</p><b>What was good</b><p>${esc(q.good)}</p>
-    <b>What could be better</b><p>${esc(q.better)}</p><b>Ideal direction</b><p>${esc(q.ideal_direction)}</p></div>`).join("");
-  const gaps = (r.preparation_gaps || []).map(g => `<div><h4>Priority ${esc(g.priority)}: ${esc(g.topic)}</h4>${list(g.review)}</div>`).join("");
+    `<div class="comp"><div>${esc(k)}: <b>${v}/100</b></div><div class="track"><div class="fill" style="width:${v}%"></div></div></div>`).join("");
+  const qf = (r.question_feedback || []).map(q => `
+    <div class="qf">
+      <b>Question</b><p>${esc(q.question)}</p>
+      <b>Your Answer</b><p>${esc(q.answer)}</p>
+      <b>Assessment</b><p>${esc(q.assessment)}</p>
+      <b>What Was Good</b><p style="color:var(--good);">${esc(q.good)}</p>
+      <b>What Could Be Better</b><p style="color:var(--warn);">${esc(q.better)}</p>
+      <b>Ideal Direction</b><p>${esc(q.ideal_direction)}</p>
+    </div>`).join("");
+  const gaps = (r.preparation_gaps || []).map(g =>
+    `<div><h4>Priority ${esc(g.priority)}: ${esc(g.topic)}</h4>${list(g.review)}</div>`).join("");
+
   $("reportRoot").innerHTML = `
     <div class="grid2">
-      <div class="card center"><p class="muted">Overall Interview Score</p><div class="score">${r.overall_score}/100</div>
-        <p>${esc(r.summary)}</p></div>
-      <div class="card center"><p class="muted">Interview Readiness</p><div class="score">${rd.emoji}</div>
-        <h2>${esc(rd.label)} (${rd.score})</h2><p>${esc(rd.message)}</p>
-        <p class="muted">Based on interview score, competencies and your ${analysis.candidate.fit.score}% job fit.</p></div>
+      <div class="card center">
+        <p class="muted">Overall Interview Score</p>
+        <div class="score">${r.overall_score}/100</div>
+        <p>${esc(r.summary)}</p>
+      </div>
+      <div class="card center">
+        <p class="muted">Interview Readiness</p>
+        <div class="score">${rd.emoji}</div>
+        <h2>${esc(rd.label)} (${rd.score})</h2>
+        <p>${esc(rd.message)}</p>
+        <p class="muted">Computed from interview answers, competency mastery, and ${analysis.candidate.fit.score}% JD fit.</p>
+      </div>
     </div>
-    <div class="card"><h3>Competency Scores</h3>${comps}
-      <p class="muted">Speaking: ${ss.avg_wpm ?? "n/a"} words/min · ${ss.total_fillers ?? 0} filler words · ~${ss.avg_words ?? 0} words per answer</p></div>
-    <div class="grid2" style="margin-top:18px">
-      <div class="card"><h3>Strengths</h3>${list(r.strengths)}</div>
-      <div class="card"><h3> Weaknesses</h3>${list(r.weaknesses)}</div></div>
-    <div class="card"><h3> Preparation Plan</h3>${gaps}</div>
-    <div class="card" style="margin-top:18px"><h3>Question-by-Question Feedback</h3>${qf}</div>
-    <button class="primary" onclick="location.reload()" style="margin-top:18px">Practice again</button>`;
+
+    <div class="card">
+      <h3>Competency Mastery Breakdown</h3>
+      ${comps}
+      <p class="muted" style="margin-top:14px;">Speaking Pace: ${ss.avg_wpm ?? "n/a"} words/min · ${ss.total_fillers ?? 0} filler words · ~${ss.avg_words ?? 0} words per answer</p>
+    </div>
+
+    <div class="grid2" style="margin-top:20px;">
+      <div class="card"><h3>Strengths Demonstrated</h3>${list(r.strengths)}</div>
+      <div class="card"><h3>Gaps &amp; Weaknesses</h3>${list(r.weaknesses)}</div>
+    </div>
+
+    <div class="card">
+      <h3>Prioritized Preparation Plan</h3>
+      ${gaps}
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3>Question-by-Question Deep Dive</h3>
+      ${qf}
+    </div>
+
+    <div class="row" style="margin-top:22px;">
+      <button class="primary" onclick="location.reload()">Practice Again ↺</button>
+      <button class="ghost" id="reportViewPortfolioBtn"> Review Tailored Portfolio Website</button>
+    </div>`;
+
+  const rpb = $("reportViewPortfolioBtn");
+  if (rpb) rpb.onclick = openPortfolioStudio;
 }
+
 speechSynthesis.getVoices();
 </script>
 </body>

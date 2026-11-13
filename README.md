@@ -1,206 +1,203 @@
-# AI Interview Accelerator
+# AI Interview Accelerator & Portfolio Studio
 
-Interview Accelerator is a web app that prepares you for one specific job interview. You give it a job description and your resume, and it works out what the employer wants, how well you match, and then interviews you out loud. The interviewer is an AI that reads your resume, listens to your answers, and decides what to ask next based on how you actually did. At the end you get a scored report, specific feedback on every answer, and a prioritised list of what to study before the real thing.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com)
+[![Groq LLM](https://img.shields.io/badge/LLM-Groq%20API-orange.svg)](https://groq.com)
+[![Vercel Ready](https://img.shields.io/badge/Deploy-Vercel-black.svg)](https://vercel.com)
 
-I built it because generic question banks never prepared me for the questions that actually get asked: the ones about my own projects and the claims on my own resume.
-
-**Live demo:** `https://interview-accelerator-w3z8.onrender.com`  
-
+**AI Interview Accelerator** is an end-to-end career preparation platform tailored to one specific target role. Given a Job Description (JD) and your Resume, the system:
+1. Deconstructs what the employer requires and computes your objective match score.
+2. Synthesizes a role-aligned, production-ready **Portfolio Website** customized for recruiter review with multi-theme switching and instant HTML export.
+3. Conducts a dynamic, out-loud **AI Voice Mock Interview** that evaluates your answers in real time and probes your specific projects.
+4. Generates an exhaustive **Diagnostic Performance Report** with competency benchmarks, speech signal analytics, and an actionable preparation plan.
 
 ---
 
-## What it does
+## What It Does
 
-1. **Role analysis.** Paste or upload a JD (PDF, DOCX or TXT). The app extracts the role, responsibilities, required and preferred skills, technical and behavioural competencies, experience expectations, keywords and key concepts.
-2. **Candidate analysis.** It compares your resume against the JD and shows your skills, relevant experience, projects and achievements, strengths, weak areas, and the resume claims an interviewer is likely to question.
-3. **Job fit score.** Every JD requirement is judged as a strong, partial or missing match, and the score is computed from those judgements (see [Fit scoring](#job-fit-scoring)).
-4. **Voice interview.** A three-level interview where the AI speaks each question, listens to your spoken answer, transcribes it live, evaluates it, and generates the next question.
-5. **Performance report.** Overall score, seven competency scores, question-by-question feedback, strengths, weaknesses, a prioritised preparation plan, and a readiness verdict from 🔴 Not Ready to 🟢 Strong Candidate.
-
-### The three interview levels
-
-| Level | Style | Questions |
+| Step | Feature | Description |
 |---|---|---|
-| 1. Screening | Recruiter-style. Resume, motivation, role fit, basics | 3 |
-| 2. Competency | Job-specific technical and behavioural questions tied to your projects | 3 |
-| 3. Deep-Dive | Tough interviewer. Probes claims, challenges vague answers, scenarios, edge cases | 4 |
+| **Step 1** | **Document Parsing & Extraction** | Upload or paste your JD and Resume in **PDF**, **DOCX**, or **TXT** format. |
+| **Step 2** | **Role & Candidate Fit Analysis** | Extracts technical competencies, role responsibilities, experience levels, and computes a mathematical fit score. Flags specific resume claims that an interviewer will probe. |
+| **Step 3** | **Tailored Portfolio Studio** | Automatically architects a clean, production-grade technical portfolio showcasing custom case studies, system architectures, and categorized competencies matching the JD. |
+| **Step 4** | **Adaptive AI Voice Interview** | A 3-stage spoken interview with browser-native text-to-speech and real-time speech recognition. Adapts difficulty based on answer quality. |
+| **Step 5** | **Performance & Readiness Report** | Comprehensive breakdown across 7 competencies, speech pace analysis (WPM & filler words), question-by-question feedback, and an overall Readiness verdict. |
 
 ---
 
-## How the interview stays dynamic
-
-There is no question list anywhere in the code. Each turn makes one LLM call that does two jobs: it evaluates the answer you just gave, and it writes the next question. That call is given:
-
-- the JD analysis and the full resume
-- the requirements you only partially match or are missing
-- the resume claims flagged for probing
-- the recent conversation
-- a running memory of strengths shown, weaknesses found, and topics already covered
-- the current level and difficulty
-
-The prompt instructs the interviewer to base the next question on your last answer: follow up on vague points and unsupported claims, go deeper when you answer well, and drop to a simpler clarifying question when you struggle. The backend handles the structure around it. It controls when the level changes, and it adjusts difficulty (1 to 5) up when an answer scores 8 or above and down when it scores 4 or below.
-
-An example of the behaviour this produces: if you say you improved accuracy by 18% and compared against the previous version, the next question asks which metric you used and why, and if you say accuracy, the one after asks whether that still holds on an imbalanced dataset.
-
----
-
-## Architecture
-
-```
-Browser (single index.html)
-  ├─ Web Speech API  → speech-to-text (live transcript)
-  ├─ Speech Synthesis → text-to-speech (interviewer voice)
-  └─ fetch() ─────────────┐
-                          ▼
-FastAPI backend
-  ├─ parsing.py    PDF / DOCX / TXT → text
-  ├─ analysis.py   JD analysis, resume analysis, fit scoring
-  ├─ interview.py  session state, adaptive turn logic, report, readiness
-  └─ llm.py        Groq client, JSON-mode wrapper
-                          ▼
-                    Groq LLM API
-```
-
-**API endpoints**
-
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/api/extract` | Extract text from an uploaded file |
-| POST | `/api/analyze` | Analyse JD and resume, compute fit, create a session |
-| POST | `/api/interview/start` | Generate the first question |
-| POST | `/api/interview/answer` | Evaluate an answer and return the next question |
-| POST | `/api/interview/report` | Generate the final report |
-
-**Project structure**
+## Project Structure
 
 ```
 interview-accelerator/
+├── api/
+│   └── index.py            # Vercel serverless entrypoint exposing FastAPI
 ├── backend/
 │   ├── __init__.py
-│   ├── main.py
-│   ├── llm.py
-│   ├── parsing.py
-│   ├── analysis.py
-│   └── interview.py
+│   ├── main.py             # FastAPI REST endpoints, routing, and app lifecycle
+│   ├── analysis.py         # JD deconstruction, candidate analysis & fit scoring
+│   ├── interview.py        # Turn state machine, adaptive difficulty & report compiler
+│   ├── portfolio.py        # Tailored portfolio JSON generator & multi-theme HTML engine
+│   ├── parsing.py          # Multi-format document parser (PDF, DOCX, TXT)
+│   └── llm.py              # Groq API client with strict JSON schema parsing & retry fallback
 ├── frontend/
-│   └── index.html        # HTML, CSS and JS in one file
-├── requirements.txt
-└── .env
+│   └── index.html          # Single-file modern UI (HTML5, responsive CSS, vanilla JS)
+├── .env                    # Environment variables (API keys & model config)
+├── .gitignore              # Git ignore rules for virtualenvs, caches & temp files
+├── README.md               # Project documentation & setup instructions
+├── requirements.txt        # Python backend dependencies
+└── vercel.json             # Vercel serverless deployment routing configuration
 ```
 
 ---
 
-## Voice implementation
+## Architectural Breakdown
 
-The loop is: the interviewer's question is spoken with the browser's speech synthesis, the microphone starts automatically afterwards, speech recognition streams a live transcript into an editable text box, and you submit when you're done. The transcript stays editable so you can fix any recognition errors before the answer is evaluated.
+```
+Browser Frontend (index.html)
+  ├─ Web Speech API       → Real-time Speech-to-Text (live transcript)
+  ├─ SpeechSynthesis      → Text-to-Speech (interviewer voice)
+  ├─ Theme Switcher       → Professional / Futuristic / Playful live re-render
+  └─ REST fetch() ──────────────┐
+                                ▼
+FastAPI Backend Engine (backend/main.py)
+  ├─ parsing.py    → PDF / DOCX / TXT text extraction via pypdf & python-docx
+  ├─ analysis.py   → Semantic JD role analysis & weighted candidate fit scoring
+  ├─ portfolio.py  → Production-ready portfolio synthesis & standalone HTML generator
+  ├─ interview.py  → Adaptive conversation turns, difficulty adjustments & final diagnostic
+  └─ llm.py        → Ultra-fast inference via Groq Cloud LLMs (JSON-mode enforced)
+                                ▼
+                       Groq LLM Platform
+```
 
-I chose the browser's built-in speech APIs because they need no extra keys, add no latency from uploading audio, and give real-time transcription. The trade-off is that speech recognition works best in Chrome and Edge. If it isn't available, the app falls back to typed answers.
+### API Endpoints
 
-An optional camera self-view is included so the session feels closer to a real interview. No video is recorded or analysed, and scoring is based on what you say, not how you look.
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/extract` | Upload and extract raw text from PDF, DOCX, or TXT documents |
+| `POST` | `/api/analyze` | Parse JD and Resume, compute weighted fit score, and initialize session |
+| `POST` | `/api/portfolio` | Synthesize tailored portfolio content and generate responsive HTML website |
+| `POST` | `/api/portfolio/html` | Instant re-render of portfolio website with selected design theme |
+| `POST` | `/api/interview/start` | Generate the first adaptive screening question |
+| `POST` | `/api/interview/answer` | Evaluate candidate spoken answer, update metrics, and produce next question |
+| `POST` | `/api/interview/report` | Compile final scored performance report and readiness verdict |
+| `GET` | `/p/{session_id}` | Direct public endpoint to view standalone portfolio website |
 
 ---
 
-## Evaluation methodology
+## Features in Detail
 
-**Per-answer evaluation.** After every answer the model returns a score out of 10, relevance, strengths, gaps, and the claims you made. These feed the interviewer's memory and the difficulty control.
+### 1. Tailored Portfolio Studio
+The Portfolio Studio analyzes the requirements in the job description and highlights your relevant skills, projects, and achievements into a clean, ready-to-share portfolio website:
+- **Featured System Case Studies**: Formats projects with realistic engineering contexts, end-to-end architectures, tech stacks, and quantifiable impact metrics.
+- **Categorized Technical Competencies**: Organizes active skills into **Languages & Core**, **Frameworks & AI/ML**, and **Cloud, Databases & Tools**.
+- **Three Design Themes**:
+  -  **Professional**: Clean, corporate modern blue palette (`#2563eb`), Inter typography, elegant card elevation.
+  -  **Futuristic**: Dark cyberpunk aesthetic (`#00ffff` & `#bd00ff`), Orbitron monospace typography, glowing borders.
+  -  **Playful**: Vibrant contemporary editorial aesthetic (`#ff5a5f` & `#00a699`), Poppins typography, warm card accents.
+- **Responsive Inspection**: Toggle between **Desktop View** and **Mobile View** inside an interactive mock browser frame.
+- **Instant Export**: Download the self-contained `.html` website with one click, or open it in a fresh full-screen tab.
 
-**Speech signals.** The backend computes words per minute, answer length and filler-word count (um, uh, basically, you know and similar) for each answer. These are passed to the report as supporting evidence for the Communication and Confidence scores. Most of the weight stays on answer quality.
+### 2. Adaptive Voice Mock Interview
+The interview loop runs across three difficulty tiers:
 
-**Final report.** A single LLM call receives the full transcript, the live evaluations, the speech metrics and the job fit score. It returns an overall score, seven competency scores (Role Fit, Technical Knowledge, Problem Solving, Communication, Confidence, Depth of Understanding, Behavioural Fit), and question-level feedback. Each feedback item has the question, your answer, an assessment, what was good, what could be better, and the ideal direction. The prompt requires feedback to reference what you actually said and forbids generic advice.
+| Tier | Level | Focus & Style | Question Count |
+|---|---|---|:---:|
+| 1 | **Screening** | Recruiter-style: Career narrative, motivation, core qualifications | 3 |
+| 2 | **Competency** | Technical & behavioural deep-dive tied to projects on your resume | 3 |
+| 3 | **Deep-Dive** | Edge cases, system constraints, trade-offs, and probing vague claims | 4 |
 
-### Job fit scoring
+#### Real-Time Adaptive Logic
+- **Dual-Job Turn**: Each turn executes a single unified LLM prompt that evaluates the previous spoken answer and crafts the next question simultaneously, halving roundtrip latency.
+- **Dynamic Difficulty**: Answer scores of 8+/10 increase question difficulty (1 to 5 scale), while scores below 4/10 drop difficulty to simpler clarifying questions.
+- **Speech Signal Telemetry**: Computes words-per-minute (WPM), answer duration, and counts filler words (*um, uh, basically, you know*) to evaluate communication composure.
 
-Each JD requirement is classified as strong, partial or missing, and weighted: required skills count 2, preferred skills count 1. Strong earns full credit, partial earns half, missing earns none.
+### 3. Scoring & Readiness Formula
 
-```
-fit = 100 × Σ(weight × credit) / Σ(weight)
-```
+#### Weighted Job Fit
+Requirements are classified as **Strong** (full credit), **Partial** (half credit), or **Missing** (zero credit), with required skills weighted $2\times$ over preferred skills:
 
-The LLM judges the evidence, but the arithmetic happens in code, so the score is consistent and explainable.
+$$\text{Fit Score} = 100 \times \frac{\sum (\text{weight} \times \text{credit})}{\sum \text{weight}}$$
 
-### Readiness score
+#### Interview Readiness Score
 
-```
-readiness = 0.5 × interview score + 0.2 × average competency + 0.3 × job fit
-```
+$$\text{Readiness} = 0.5 \times \text{Interview Score} + 0.2 \times \text{Avg Competency} + 0.3 \times \text{Job Fit}$$
 
-| Score | Verdict |
+| Readiness Score | Verdict |
 |---|---|
-| below 40 | Not Ready |
-| 40 to 59 | Needs Preparation |
-| 60 to 77 | Interview Ready |
-| 78 and above | Strong Candidate |
+| $< 40$ | 🔴 **Not Ready** |
+| $40 - 59$ | 🟡 **Needs Preparation** |
+| $60 - 77$ | 🟢 **Interview Ready** |
+| $78 - 100$ | 🌟 **Strong Candidate** |
 
 ---
 
-## Key technical decisions
+## Getting Started
 
-- **One combined call per turn (evaluate and ask).** It halves latency compared with separate evaluation and generation calls, and the evaluation and next question stay consistent with each other.
-- **Code controls the structure, the LLM controls the content.** Level progression, difficulty bounds and score formulas are deterministic. Question wording and judgement are the model's job.
-- **Strict JSON output.** Every LLM call uses JSON mode with a regex fallback parser, so malformed output doesn't crash a session.
-- **Single-file frontend.** No build step, one file to deploy, easy to read end to end.
-- **Server-side sessions kept in memory.** The right trade-off for a prototype; see limitations below.
+### Prerequisites
+- **Python 3.10+**
+- A free **[Groq API Key](https://console.groq.com)**
+- Google Chrome or Microsoft Edge (recommended for Web Speech API speech synthesis & recognition)
+
+### Local Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/vanig245/Interview-Accelerator.git
+   cd Interview-Accelerator
+   ```
+
+2. **Create and activate a virtual environment:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate       # On Windows: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment variables:**
+   Create a `.env` file in the project root:
+   ```env
+   GROQ_API_KEY=your_groq_api_key_here
+   GROQ_MODEL=openai/gpt-oss-120b
+   ```
+
+5. **Start the local server:**
+   ```bash
+   uvicorn backend.main:app --reload --port 8000
+   ```
+
+6. **Launch the application:**
+   Open [http://localhost:8000](http://localhost:8000) in Chrome or Edge.
 
 ---
-
-## Getting started
-
-**Requirements:** Python 3.10+, a [Groq API key](https://console.groq.com), and Chrome or Edge.
-
-```bash
-git clone https://github.com/vanig245/Interview-Accelerator.git
-cd Interview-Accelerator
-
-python3 -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Create a `.env` file in the project root:
-
-```
-GROQ_API_KEY=your_key_here
-GROQ_MODEL=openai/gpt-oss-120b
-```
-
-Run it:
-
-```bash
-uvicorn backend.main:app --reload
-```
-
-Open http://localhost:8000, paste a JD and a resume, and allow microphone access when prompted.
-
-Groq retires models from time to time. If you see a "model decommissioned" error, pick a current model from their docs and update `GROQ_MODEL`.
 
 ## Deployment
 
-The app is a single FastAPI service. On a platform like Render:
+### Option A: Deploy to Vercel (Recommended Serverless)
 
-- Build command: `pip install -r requirements.txt`
-- Start command: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
-- Environment variables: `GROQ_API_KEY` and `GROQ_MODEL`
+The project includes built-in Vercel configuration (`vercel.json` + `api/index.py`):
 
-HTTPS is required for microphone access in browsers, and most hosting platforms provide it by default (`localhost` also works).
+1. Push your repository to GitHub.
+2. Log in to [Vercel](https://vercel.com) and click **Add New Project**.
+3. Select your repository.
+4. Under **Environment Variables**, add:
+   - `GROQ_API_KEY` = your Groq API key
+   - `GROQ_MODEL` = `openai/gpt-oss-120b` (or `llama-3.3-70b-versatile`)
+5. Click **Deploy**. Vercel will build and serve your app globally via `@vercel/python`.
 
----
+### Option B: Deploy to Render / Cloud Platforms
 
-## Limitations
-
-- Sessions are stored in server memory, so they are lost on restart and the app should run as a single instance.
-- Speech recognition quality depends on the browser and works best with clear English speech.
-- Scores come from an LLM and should be treated as guidance for practice, not an objective measure.
-- Interview history is not persisted between sessions.
-
-## Roadmap
-
-- Persistent storage with interview history and progress tracking across attempts
-- Whisper-based transcription as a fallback for browsers without speech recognition
-- Resume improvement suggestions based on the gaps found
-- Coding and technical question mode
-- Pace and pause analysis with a visual breakdown in the report
-- Shareable report links
+The application runs as a standard FastAPI web service:
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+- **Environment Variables:** `GROQ_API_KEY`, `GROQ_MODEL`
+- **Note:** Ensure your deployment URL uses **HTTPS** so browsers allow microphone permissions.
 
 ---
 
-Built by Vani.
+## License
+
+This project is licensed under the [MIT License](LICENSE).
